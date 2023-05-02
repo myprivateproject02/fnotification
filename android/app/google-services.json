@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1088629577763",
+    "firebase_url": "https://kotlin-firebase-e4212.firebaseio.com",
+    "project_id": "kotlin-firebase-e4212",
+    "storage_bucket": "kotlin-firebase-e4212.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1088629577763:android:5b8c2717284b5d9133b996",
+        "android_client_info": {
+          "package_name": "com.jadhavrupesh.notification"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1088629577763-9hqbnblju0drgcovrpedvu40irtmkf2c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSp7IDLScAOKpkRxtv1fbpLRmZEiMc2Ms"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1088629577763-9hqbnblju0drgcovrpedvu40irtmkf2c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
