@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+// import 'package:app_settings/app_settings.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,10 +18,10 @@ class NotificationService {
 
     NotificationSettings settings = await messaging.requestPermission(
       alert: true,
-      announcement: false,
+      announcement: true,
       badge: true,
-      carPlay: false,
-      criticalAlert: false,
+      carPlay: true,
+      criticalAlert: true,
       provisional: false,
       sound: true,
     );
@@ -36,8 +37,7 @@ class NotificationService {
     }
   }
 
-  void initLocalNotificationSettings(
-      BuildContext context, RemoteMessage message) async {
+  void initLocalNotificationSettings(RemoteMessage message) async {
     // Android-specific configuration
     var androidInitialize =
         const AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -50,21 +50,42 @@ class NotificationService {
         InitializationSettings(android: androidInitialize, iOS: iosInitialize);
 
     await _flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onDidReceiveNotificationResponse: (payload) {},
-        onDidReceiveBackgroundNotificationResponse: (payload) {});
+        onDidReceiveNotificationResponse: (payload) {
+      if (kDebugMode) {
+        print(
+            "message received title onDidReceiveNotificationResponse : ${message.data['title'] ?? ""}");
+        print(
+            "message received body onDidReceiveNotificationResponse : ${message.data['body'] ?? ""}");
+      }
+    }, onDidReceiveBackgroundNotificationResponse: notificationTapBackground);
+  }
+
+  @pragma('vm:entry-point')
+  void notificationTapBackground(NotificationResponse payload) {
+    // ignore: avoid_print
+    print('notificationTapBackground tap (${payload.id}) action tapped: '
+        '${payload.actionId} with'
+        ' payload: ${payload.payload}');
+    if (payload.input?.isNotEmpty ?? false) {
+      // ignore: avoid_print
+      print('notification action tapped with input: ${payload.input}');
+    }
   }
 
   void firebaseInit() {
     FirebaseMessaging.onMessage.listen((message) {
       if (kDebugMode) {
-        print("message received title: ${message.notification?.title}");
-        print("message received body: ${message.notification?.body}");
+        print("message received title: ${message.data['title'] ?? ""}");
+        print("message received body: ${message.data['body'] ?? ""}");
       }
       showNotification(message);
     });
   }
 
   Future<void> showNotification(RemoteMessage message) async {
+    var notificationJson = await getNotificationJson(message);
+    print("notificationContent is $notificationJson");
+
     AndroidNotificationChannel androidNotificationChannel =
         const AndroidNotificationChannel(
       'high_importance_channel',
@@ -96,12 +117,29 @@ class NotificationService {
     Future.delayed(Duration.zero, () {
       _flutterLocalNotificationsPlugin.show(
         0,
-        message.notification?.title ?? "",
-        message.notification?.body ?? "",
+        message.data["sound"] ?? "",
+        message.data["deepLink"] ?? "",
         notificationDetails,
         payload: json.encode(message.data),
       );
     });
+  }
+
+  Future<String> getNotificationJson(RemoteMessage notification) async {
+    // Create a new JSON map.
+    Map<String, dynamic> jsonMap = {};
+
+    // Add the notification title and body to the map.
+    jsonMap['title'] = notification.notification?.title;
+    jsonMap['body'] = notification.notification?.body;
+
+    // Add any custom data to the map.
+    jsonMap['data'] = notification.data;
+
+    // Encode the map to a JSON string.
+    String jsonString = jsonEncode(jsonMap);
+
+    return jsonString;
   }
 
   Future<String> getDeviceToken() async {
